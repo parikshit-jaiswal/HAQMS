@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "build": "npx prisma generate",
+    "build": "echo 'No build step required for this Node.js backend'",
     "dev": "nodemon src/index.js",
     "render-start": "node src/index.js",
     "prisma:generate": "prisma generate",
