@@ -427,7 +427,7 @@ export default function Dashboard() {
     }
   };
 
-  // Search Doctors (SQL Injection vulnerable API!)
+  // Search Doctors
   const searchPhysiciansAdmin = async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/doctors?search=${adminSearchQuery}`, {
@@ -1230,7 +1230,7 @@ export default function Dashboard() {
         )}
 
         {/* ==============================================================
-            TAB: PHYSICIAN REGISTRY (ADMIN ROLE - SQL INJECTION VULNERABILITY)
+            TAB: PHYSICIAN REGISTRY (ADMIN ROLE)
             ============================================================== */}
         {activeTab === 'physicians' && (
           <div className="glass p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md space-y-6">
