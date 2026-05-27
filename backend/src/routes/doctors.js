@@ -7,8 +7,6 @@ const prisma = new PrismaClient();
 
 // GET /api/doctors
 // Retrieve list of doctors with special search filtering
-// SECURITY BUG: SQL Injection vulnerability in the search parameter!
-// Uses queryRawUnsafe with string concatenation instead of parameterized inputs.
 router.get('/', authenticate, async (req, res) => {
   try {
     const { search, specialization } = req.query;
