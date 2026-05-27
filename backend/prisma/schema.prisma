@@ -83,6 +83,12 @@ model Appointment {
   patient          Patient           @relation(fields: [patientId], references: [id])
   doctor           Doctor            @relation(fields: [doctorId], references: [id])
   queueTokens      QueueToken[]
+
+  @@unique([doctorId, appointmentDate])
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([status])
+  @@index([appointmentDate])
 }
 
 model QueueToken {
@@ -97,4 +103,9 @@ model QueueToken {
   patient       Patient     @relation(fields: [patientId], references: [id])
   doctor        Doctor      @relation(fields: [doctorId], references: [id])
   appointment   Appointment? @relation(fields: [appointmentId], references: [id])
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([status])
+  @@index([createdAt])
 }
