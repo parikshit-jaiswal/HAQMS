@@ -1,33 +1,34 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Navbar from '@/components/common/Navbar';
-import { Activity, Bell, Monitor, RefreshCw, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Navbar from "@/components/common/Navbar";
+import { Activity, Bell, Monitor, RefreshCw, AlertCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function QueueMonitor() {
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+  const { token, API_BASE_URL } = useAuth();
+
   // Duplicated config state just to add minor code smell
   const [refreshCount, setRefreshCount] = useState(0);
 
-  // HARDCODED API BASE URL: Duplicated from AuthContext (code duplication smell)
-  const API_BASE_URL = 'http://localhost:5000/api';
-
   const fetchQueueData = async () => {
     try {
-      // Insecure: Fetches queue without checking credentials (it's a public dashboard, which is fine, 
+      // Insecure: Fetches queue without checking credentials (it's a public dashboard, which is fine,
       // but it uses the hardcoded API domain)
-      const res = await fetch(`${API_BASE_URL}/queue`);
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${API_BASE_URL}/queue`, { headers });
+      console.log(`[FETCH] Queue data fetched with status ${res.status}`);
       if (!res.ok) {
-        throw new Error('Failed to retrieve active token queue.');
+        throw new Error("Failed to retrieve active token queue.");
       }
       const data = await res.json();
       setTokens(data);
-      setError('');
+      setError("");
     } catch (err) {
-      console.error('Queue poll fetch error:', err);
+      console.error("Queue poll fetch error:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -65,10 +66,10 @@ export default function QueueMonitor() {
         waiting: [],
       };
     }
-    
-    if (token.status === 'CALLING') {
+
+    if (token.status === "CALLING") {
       groups[docId].calling = token;
-    } else if (token.status === 'WAITING') {
+    } else if (token.status === "WAITING") {
       groups[docId].waiting.push(token);
     }
     return groups;
@@ -77,7 +78,7 @@ export default function QueueMonitor() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      
+
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 sm:p-8">
         {/* Header Dashboard Banner */}
         <div className="glass p-6 sm:p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -94,7 +95,7 @@ export default function QueueMonitor() {
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 text-teal-600 dark:text-teal-400 text-xs font-bold uppercase tracking-wide border border-teal-500/20">
               <RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -111,7 +112,8 @@ export default function QueueMonitor() {
           <div className="p-4 mb-6 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center gap-3 text-sm">
             <AlertCircle className="h-5 w-5 shrink-0" />
             <div>
-              <strong>Sync Error:</strong> {error} - Please verify that the backend API server is online.
+              <strong>Sync Error:</strong> {error} - Please verify that the
+              backend API server is online.
             </div>
           </div>
         )}
@@ -123,14 +125,20 @@ export default function QueueMonitor() {
               <div></div>
               <div></div>
             </div>
-            <p className="mt-4 text-sm font-semibold text-slate-400">Loading active token queues...</p>
+            <p className="mt-4 text-sm font-semibold text-slate-400">
+              Loading active token queues...
+            </p>
           </div>
         ) : Object.keys(groupedTokens).length === 0 ? (
           <div className="glass p-12 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
             <Bell className="h-12 w-12 text-slate-400 mx-auto animate-bounce" />
-            <h3 className="mt-4 text-lg font-bold text-slate-800 dark:text-slate-100">No Active Tokens</h3>
+            <h3 className="mt-4 text-lg font-bold text-slate-800 dark:text-slate-100">
+              No Active Tokens
+            </h3>
             <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm max-w-md mx-auto">
-              There are currently no patient check-ins registered for today. Use the receptionist portal in the Staff Dashboard to check-in patients.
+              There are currently no patient check-ins registered for today. Use
+              the receptionist portal in the Staff Dashboard to check-in
+              patients.
             </p>
           </div>
         ) : (
@@ -143,7 +151,9 @@ export default function QueueMonitor() {
               >
                 {/* Doctor Title Header */}
                 <div className="bg-slate-500/5 p-5 border-b border-slate-200 dark:border-slate-800">
-                  <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-100">{docInfo.doctorName}</h3>
+                  <h3 className="font-extrabold text-lg text-slate-800 dark:text-slate-100">
+                    {docInfo.doctorName}
+                  </h3>
                   <p className="text-xs text-teal-600 dark:text-teal-400 font-bold uppercase tracking-wider mt-0.5">
                     {docInfo.specialization}
                   </p>

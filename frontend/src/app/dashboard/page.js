@@ -40,7 +40,7 @@ export default function Dashboard() {
   const [regEmail, setRegEmail] = useState('');
   const [regPhone, setRegPhone] = useState('');
   const [regAge, setRegAge] = useState('');
-  const [regGender, setRegGender] = useState('Male');
+  const [regGender, setRegGender] = useState('MALE');
   const [regHistory, setRegHistory] = useState('');
   const [regMessage, setRegMessage] = useState('');
 
@@ -594,9 +594,9 @@ export default function Dashboard() {
                         onChange={(e) => setRegGender(e.target.value)}
                         className="block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:outline-none"
                       >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
                       </select>
                     </div>
                   </div>

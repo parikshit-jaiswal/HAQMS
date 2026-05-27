@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Activity, ShieldAlert, MonitorPlay, Users, CalendarDays, ArrowRight } from 'lucide-react';
+import Link from "next/link";
+import {
+  Activity,
+  ShieldAlert,
+  MonitorPlay,
+  Users,
+  CalendarDays,
+  ArrowRight,
+} from "lucide-react";
 
 export default function Home() {
   return (
@@ -11,17 +18,18 @@ export default function Home() {
           <Activity className="h-4 w-4" />
           Live Queue Tracking Enabled
         </div>
-        
+
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-teal-600 to-emerald-500 bg-clip-text text-transparent">
           HAQMS
         </h1>
         <p className="text-xl sm:text-2xl font-bold mt-2 text-slate-700 dark:text-slate-200">
           Hospital Appointment & Queue Management System
         </p>
-        
+
         <p className="mt-6 text-lg text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-          Welcome to the HAQMS testing environment. This portal serves as a deliberately flawed, 
-          fully functional reference application designed to evaluate software engineering candidates.
+          Welcome to the HAQMS testing environment. This portal serves as a
+          deliberately flawed, fully functional reference application designed
+          to evaluate software engineering candidates.
         </p>
 
         {/* Action Cards */}
@@ -37,7 +45,8 @@ export default function Home() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </h2>
               <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
-                Access your specialized dashboard. Supports role-based workflows for Administrators, Doctors, and Receptionists.
+                Access your specialized dashboard. Supports role-based workflows
+                for Administrators, Doctors, and Receptionists.
               </p>
             </div>
           </Link>
@@ -53,7 +62,8 @@ export default function Home() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </h2>
               <p className="mt-2 text-slate-500 dark:text-slate-400 text-sm">
-                Real-time active queue board tracking patient check-ins and calling tokens by physician. Built with live refresh.
+                Real-time active queue board tracking patient check-ins and
+                calling tokens by physician. Built with live refresh.
               </p>
             </div>
           </Link>
@@ -65,17 +75,22 @@ export default function Home() {
             <ShieldAlert className="h-6 w-6" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800 dark:text-slate-100">Assessment Environment Notice</h3>
+            <h3 className="font-bold text-slate-800 dark:text-slate-100">
+              Assessment Environment Notice
+            </h3>
             <p className="mt-1 text-slate-500 dark:text-slate-400 text-sm">
-              This repository contains critical architectural, database performance, frontend memory, and security bugs. 
-              Your evaluation criteria will measure your ability to identify, trace, profile, and fix these issues systematically.
+              This repository contains critical architectural, database
+              performance, frontend memory, and security bugs. Your evaluation
+              criteria will measure your ability to identify, trace, profile,
+              and fix these issues systematically.
             </p>
           </div>
         </div>
       </div>
 
       <footer className="text-center text-slate-400 dark:text-slate-500 text-xs mt-12">
-        HAQMS v1.0.0-deliberate-bugs &copy; {new Date().getFullYear()} Candidate Evaluation Framework.
+        HAQMS v1.0.0-deliberate-bugs &copy; {new Date().getFullYear()} Candidate
+        Evaluation Framework.
       </footer>
     </div>
   );
