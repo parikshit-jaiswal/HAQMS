@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/common/Navbar';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Users, CalendarDays, Activity, Search, Sparkles, UserPlus, 
   Trash2, ClipboardList, TrendingUp, DollarSign, Award, Clock,
@@ -47,6 +48,11 @@ export default function Dashboard() {
 
   // Queue and Appointment Booking
   const [doctorsList, setDoctorsList] = useState([]);
+  const [doctorUsers, setDoctorUsers] = useState([]);
+  const [linkDoctorId, setLinkDoctorId] = useState('');
+  const [linkUserId, setLinkUserId] = useState('');
+  const [linkMessage, setLinkMessage] = useState('');
+  const [linkLoading, setLinkLoading] = useState(false);
   const [bookingPatientId, setBookingPatientId] = useState('');
   const [bookingDoctorId, setBookingDoctorId] = useState('');
   const [bookingDate, setBookingDate] = useState('');
@@ -125,9 +131,23 @@ export default function Dashboard() {
     }
   };
 
+  const fetchDoctorUsers = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/doctors/users`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      setDoctorUsers(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+      setDoctorUsers([]);
+    }
+  };
+
   useEffect(() => {
     if (!user) return;
     fetchDoctorsDropdown();
+    fetchDoctorUsers();
   }, []);
 
   // Handle Patient Registration
@@ -239,6 +259,17 @@ export default function Dashboard() {
   // Queue Token Checkin (Race condition API!)
   const handleQueueCheckin = async (patientId, doctorId, appointmentId = null) => {
     setCheckinMessage('');
+
+    const resolvedDoctorId = doctorId ||
+      (user?.role === 'DOCTOR'
+        ? doctorsList.find((d) => d.userId === user.id)?.id
+        : null);
+
+    if (!resolvedDoctorId) {
+      setCheckinMessage('Error check-in: Please select a doctor first.');
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/queue/checkin`, {
         method: 'POST',
@@ -246,7 +277,7 @@ export default function Dashboard() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ patientId, doctorId, appointmentId })
+        body: JSON.stringify({ patientId, doctorId: resolvedDoctorId, appointmentId })
       });
       const data = await res.json();
       if (res.ok) {
@@ -257,6 +288,43 @@ export default function Dashboard() {
       }
     } catch (err) {
       setCheckinMessage(`Error: ${err.message}`);
+    }
+  };
+
+  const handleLinkDoctorUser = async (e) => {
+    e.preventDefault();
+    setLinkMessage('');
+
+    if (!linkDoctorId || !linkUserId) {
+      setLinkMessage('Error: Select both doctor and user.');
+      return;
+    }
+
+    setLinkLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/doctors/${linkDoctorId}/link-user`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ userId: linkUserId })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setLinkMessage(`Error: ${data.error || 'Failed to link doctor'}`);
+        return;
+      }
+
+      setLinkMessage('Success: Doctor linked to login account.');
+      setLinkDoctorId('');
+      setLinkUserId('');
+      fetchDoctorsDropdown();
+    } catch (err) {
+      setLinkMessage(`Error: ${err.message}`);
+    } finally {
+      setLinkLoading(false);
     }
   };
 
@@ -706,7 +774,10 @@ export default function Dashboard() {
                   >
                     <option value="">-- Choose Physician --</option>
                     {doctorsList.map(d => (
-                      <option key={d.id} value={d.id}>{d.name} - {d.specialization} (${d.consultationFee})</option>
+                      <option key={d.id} value={d.id}>
+                        {d.name} - {d.specialization} (${d.consultationFee})
+                        {d.user?.email ? ` [${d.user.email}]` : ''}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -740,6 +811,61 @@ export default function Dashboard() {
                   Book Appointment Slot
                 </button>
               </form>
+
+              <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-800">
+                <h4 className="text-sm font-extrabold text-slate-800 dark:text-slate-100 mb-3">
+                  Link Doctor to Login
+                </h4>
+
+                {linkMessage && (
+                  <div className={`p-2 text-xs rounded-lg mb-3 ${linkMessage.startsWith('Success') ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border border-teal-500/20' : 'bg-rose-500/15 text-rose-500 border border-rose-500/20'}`}>
+                    {linkMessage}
+                  </div>
+                )}
+
+                <form onSubmit={handleLinkDoctorUser} className="space-y-3 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                  <div>
+                    <label className="block mb-1">Doctor Profile*</label>
+                    <select
+                      value={linkDoctorId}
+                      onChange={(e) => setLinkDoctorId(e.target.value)}
+                      className="block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:outline-none"
+                    >
+                      <option value="">-- Choose Doctor --</option>
+                      {doctorsList.map((d) => (
+                        <option key={d.id} value={d.id}>
+                          {d.name} - {d.specialization}
+                          {d.user?.email ? ` [${d.user.email}]` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1">Doctor Login User*</label>
+                    <select
+                      value={linkUserId}
+                      onChange={(e) => setLinkUserId(e.target.value)}
+                      className="block w-full px-3 py-2 border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50 rounded-lg text-slate-900 dark:text-slate-100 text-sm focus:outline-none"
+                    >
+                      <option value="">-- Choose Doctor User --</option>
+                      {doctorUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} [{u.email}]
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={linkLoading}
+                    className="glow-btn w-full py-2 bg-slate-900 hover:bg-slate-800 text-white dark:bg-teal-500 dark:text-slate-950 dark:hover:bg-teal-400 font-extrabold text-xs rounded-lg shadow-md transition-colors duration-300 disabled:opacity-60"
+                  >
+                    {linkLoading ? 'Linking...' : 'Link Doctor Account'}
+                  </button>
+                </form>
+              </div>
             </div>
 
             {/* Quick Walkin Checkin Token Board */}
@@ -780,7 +906,9 @@ export default function Dashboard() {
                     >
                       <option value="">-- Choose Physician --</option>
                       {doctorsList.map(d => (
-                        <option key={d.id} value={d.id}>{d.name} ({d.specialization})</option>
+                        <option key={d.id} value={d.id}>
+                          {d.name} ({d.specialization}){d.user?.email ? ` [${d.user.email}]` : ''}
+                        </option>
                       ))}
                     </select>
                   </div>

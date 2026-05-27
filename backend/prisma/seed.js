@@ -40,8 +40,19 @@ async function seed() {
   ]);
 
   const [drA, drB] = await prisma.$transaction([
-    prisma.doctor.create({
-      data: {
+    prisma.doctor.upsert({
+      where: { userId: doctorUser.id },
+      update: {
+        name: 'Dr. Meredith Grey',
+        specialization: 'General Surgery',
+        department: 'Surgery',
+        consultationFee: 500,
+        experience: 12,
+        startTime: '09:00',
+        endTime: '17:00',
+      },
+      create: {
+        userId: doctorUser.id,
         name: 'Dr. Meredith Grey',
         specialization: 'General Surgery',
         department: 'Surgery',
