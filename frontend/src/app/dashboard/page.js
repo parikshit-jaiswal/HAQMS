@@ -21,10 +21,10 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  if (!user) return null;
-
   // Global State
-  const [activeTab, setActiveTab] = useState(user.role === 'ADMIN' ? 'reports' : user.role === 'RECEPTIONIST' ? 'patients' : 'appointments');
+  const [activeTab, setActiveTab] = useState(
+    user?.role === 'ADMIN' ? 'reports' : user?.role === 'RECEPTIONIST' ? 'patients' : 'appointments'
+  );
 
   // ==========================================
   // STATE FOR RECEPTIONIST WORKFLOWS
@@ -97,6 +97,7 @@ export default function Dashboard() {
 
   // Trigger Patient List Fetch (Every keystroke trigger re-renders parent! - Performance bug)
   useEffect(() => {
+    if (!user) return;
     if (user.role === 'RECEPTIONIST' || user.role === 'ADMIN') {
       fetchPatients(1);
     }
@@ -116,6 +117,7 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchDoctorsDropdown();
   }, []);
 
@@ -253,7 +255,7 @@ export default function Dashboard() {
   // DOCTOR WORKFLOW FUNCTIONS
   // ==========================================
   const fetchDoctorWorklist = async () => {
-    if (user.role !== 'DOCTOR') return;
+    if (!user || user.role !== 'DOCTOR') return;
     try {
       // Find matching doctor from doctors dropdown using user ID link
       const matchedDoc = doctorsList.find(d => d.userId === user.id);
@@ -281,10 +283,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    if (!user) return;
     if (user.role === 'DOCTOR' && doctorsList.length > 0) {
       fetchDoctorWorklist();
     }
-  }, [doctorsList]);
+  }, [doctorsList, user]);
 
   // Update token status (WAITING -> CALLING -> COMPLETED / SKIPPED)
   const handleUpdateQueueStatus = async (tokenId, newStatus) => {
@@ -363,6 +366,8 @@ export default function Dashboard() {
       console.error(e);
     }
   };
+
+  if (!user) return null;
 
   return (
     <div className="min-h-screen flex flex-col">
